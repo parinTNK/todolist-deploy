@@ -11,19 +11,19 @@ const getTodos = async (req, res) => {
     }
 }
 const createTodo = async (req, res) => {  
-    const {title, description} = req.body;
+    const { title } = req.body; // Removed description, added completed
     try {
-        const newTodo = await prisma.todos.create({ // เปลี่ยนจาก prisma.todo เป็น prisma.todos
+        const newTodo = await prisma.todos.create({
             data: {
                 title,
-                description,
+                completed: false, // Default value for completed
             },
         });
         res.status(201).json(newTodo);
     } catch (error) {
-        res.status(500).json({error: 'Failed to create todo'});
+        res.status(500).json({ error: 'Failed to create todo', details: error.message });
     }
-}
+};
 const updateTodo = async (req, res) => {
     const {id} = req.params;
     const {title, description} = req.body;
