@@ -1,16 +1,5 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "src/server.mjs",
-        "use": "@vercel/node"
-      }
-    ],
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "./src/server.mjs"
-      }
-    ]
-  }
-  
+  "version": 2,
+  "framework": "vite",
+  "outputDirectory": "dist"
+}
