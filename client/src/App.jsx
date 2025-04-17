@@ -13,14 +13,18 @@ const App = () => {
     fetchTodos();
 
     // Connect to Socket.IO server
-    const socket = io("https://todolist-deploy-6q3u.onrender.com");
+    const socket = io("https://todolist-deploy-6q3u.onrender.com", {
+      transports: ["websocket"], // Ensure WebSocket transport is used
+    });
 
     // Listen for real-time events
     socket.on("todoAdded", (todo) => {
+      console.log("New todo added:", todo); // Debugging log
       setTodos((prevTodos) => [...prevTodos, todo]);
     });
 
     socket.on("todoDeleted", (id) => {
+      console.log("Todo deleted with ID:", id); // Debugging log
       setTodos((prevTodos) => prevTodos.filter((todo) => todo._id !== id));
     });
 
