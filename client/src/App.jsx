@@ -3,7 +3,7 @@ import axios from "axios";
 
 const App = () => {
   const [todos, setTodos] = useState([]);
-  const [newTodo, setNewTodo] = useState({ title: ""});
+  const [newTodo, setNewTodo] = useState({ title: "" });
 
   useEffect(() => {
     fetchTodos();
@@ -11,7 +11,7 @@ const App = () => {
 
   const fetchTodos = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/todos");
+      const response = await axios.get("https://todolist-deploy-6q3u.onrender.com/api/todos");
       setTodos(response.data);
     } catch (error) {
       console.error("Error fetching todos:", error);
@@ -20,9 +20,9 @@ const App = () => {
 
   const addTodo = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/api/todos", newTodo);
+      const response = await axios.post("https://todolist-deploy-6q3u.onrender.com/api/todos", newTodo);
       setTodos([...todos, response.data]);
-      setNewTodo({ title: ""});
+      setNewTodo({ title: "" });
     } catch (error) {
       console.error("Error adding todo:", error);
     }
@@ -30,7 +30,7 @@ const App = () => {
 
   const deleteTodo = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/todos/${id}`);
+      await axios.delete(`https://todolist-deploy-6q3u.onrender.com/api/todos/${id}`);
       setTodos(todos.filter((todo) => todo.id !== id));
     } catch (error) {
       console.error("Error deleting todo:", error);
@@ -48,7 +48,7 @@ const App = () => {
           onChange={(e) => setNewTodo({ ...newTodo, title: e.target.value })}
           className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <button 
+        <button
           onClick={addTodo}
           className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
         >
@@ -59,7 +59,7 @@ const App = () => {
         {todos.map((todo) => (
           <li key={todo.id} className="bg-white p-4 rounded-lg shadow flex flex-row justify-between items-center">
             <h3 className="text-xl font-semibold mb-2">{todo.title}</h3>
-            <button 
+            <button
               onClick={() => deleteTodo(todo.id)}
               className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
             >
