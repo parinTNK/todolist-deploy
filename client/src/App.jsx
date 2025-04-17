@@ -52,7 +52,7 @@ const App = () => {
 
   return (
     <div className="container mx-auto p-4 max-w-2xl">
-      <h1 className="text-4xl font-bold mb-6 text-center text-blue-600">Todo List</h1>
+      <h1 className="text-4xl font-bold mb-6 text-center text-blue-400">I Love you</h1>
       <div className="mb-6 flex flex-col sm:flex-row gap-4 justify-center">
         <input
           type="text"
@@ -70,7 +70,7 @@ const App = () => {
           }`}
           disabled={adding} // Disable button while adding
         >
-          {adding ? "Adding..." : "Add Todo"}
+          {adding ? "Adding..." : "Say it!"}
         </button>
       </div>
       {loading ? (
