@@ -31,9 +31,9 @@ const App = () => {
   const deleteTodo = async (id) => {
     try {
       await axios.delete(`https://todolist-deploy-6q3u.onrender.com/api/todos/${id}`);
-      setTodos(todos.filter((todo) => todo.id !== id));
+      setTodos(todos.filter((todo) => todo._id !== id)); // ใช้ _id แทน id
     } catch (error) {
-      console.error("Error deleting :", error);
+      console.error("Error deleting todo:", error);
     }
   };
 
@@ -57,10 +57,10 @@ const App = () => {
       </div>
       <ul className="space-y-4">
         {todos.map((todo) => (
-          <li key={todo.id} className="bg-white p-4 rounded-lg shadow flex flex-row justify-between items-center">
+          <li key={todo._id} className="bg-white p-4 rounded-lg shadow flex flex-row justify-between items-center">
             <h3 className="text-xl font-semibold mb-2">{todo.title}</h3>
             <button
-              onClick={() => deleteTodo(todo.id)}
+              onClick={() => deleteTodo(todo._id)} // ใช้ _id แทน id
               className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
             >
               Delete

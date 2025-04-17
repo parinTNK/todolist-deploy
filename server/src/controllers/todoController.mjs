@@ -49,14 +49,19 @@ const updateTodo = async (req, res) => {
 
 const deleteTodo = async (req, res) => {
     const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ error: 'Todo ID is required' }); // เพิ่มการตรวจสอบ id
+    }
+
     try {
-        const deletedTodo = await Todo.findByIdAndDelete(id);
+        const deletedTodo = await Todo.findByIdAndDelete(id); // ใช้ _id ใน MongoDB
         if (!deletedTodo) {
             return res.status(404).json({ error: 'Todo not found' });
         }
-        res.status(204).send({ message: 'Todo deleted successfully' });
+        res.status(200).json({ message: 'Todo deleted successfully' }); // เปลี่ยนจาก status 204 เป็น 200 พร้อมข้อความ
     } catch (error) {
-        res.status(500).json({ error: 'Failed to delete todo' });
+        res.status(500).json({ error: 'Failed to delete todo', details: error.message });
     }
 };
 
