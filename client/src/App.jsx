@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { io } from "socket.io-client";
 
 const App = () => {
   const [todos, setTodos] = useState([]);
@@ -10,6 +11,23 @@ const App = () => {
 
   useEffect(() => {
     fetchTodos();
+
+    // Connect to Socket.IO server
+    const socket = io("https://todolist-deploy-6q3u.onrender.com");
+
+    // Listen for real-time events
+    socket.on("todoAdded", (todo) => {
+      setTodos((prevTodos) => [...prevTodos, todo]);
+    });
+
+    socket.on("todoDeleted", (id) => {
+      setTodos((prevTodos) => prevTodos.filter((todo) => todo._id !== id));
+    });
+
+    // Cleanup on component unmount
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const fetchTodos = async () => {
@@ -28,8 +46,7 @@ const App = () => {
     if (!newTodo.title.trim()) return; // Prevent adding empty todos
     setAdding(true); // Set adding state to true
     try {
-      const response = await axios.post("https://todolist-deploy-6q3u.onrender.com/api/todos", newTodo);
-      setTodos([...todos, response.data]);
+      await axios.post("https://todolist-deploy-6q3u.onrender.com/api/todos", newTodo);
       setNewTodo({ title: "" });
     } catch (error) {
       console.error("Error adding todo:", error);
@@ -42,7 +59,6 @@ const App = () => {
     setDeletingId(id); // Set the ID of the todo being deleted
     try {
       await axios.delete(`https://todolist-deploy-6q3u.onrender.com/api/todos/${id}`);
-      setTodos(todos.filter((todo) => todo._id !== id));
     } catch (error) {
       console.error("Error deleting todo:", error);
     } finally {
