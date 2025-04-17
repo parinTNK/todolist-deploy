@@ -1,66 +1,63 @@
-import { PrismaClient } from "@prisma/client";
+import mongoose from 'mongoose';
 
-const prisma = new PrismaClient();
+// Define the Todo schema
+const todoSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    completed: { type: Boolean, default: false },
+});
+
+// Create the Todo model
+const Todo = mongoose.model('Todo', todoSchema);
 
 const getTodos = async (req, res) => {
     try {
-        const todos = await prisma.todos.findMany(); // เปลี่ยนจาก prisma.todo เป็น prisma.todos
+        const todos = await Todo.find(); // Fetch all todos
         res.status(200).json(todos);
     } catch (error) {
-        res.status(500).json({error: 'Failed to fetch todos'});
+        res.status(500).json({ error: 'Failed to fetch todos' });
     }
-}
-const createTodo = async (req, res) => {  
-    const { title } = req.body; // Removed description, added completed
+};
+
+const createTodo = async (req, res) => {
+    const { title } = req.body;
     try {
-        const newTodo = await prisma.todos.create({
-            data: {
-                title,
-                completed: false, // Default value for completed
-            },
-        });
+        const newTodo = new Todo({ title });
+        await newTodo.save(); // Save the new todo
         res.status(201).json(newTodo);
     } catch (error) {
         res.status(500).json({ error: 'Failed to create todo', details: error.message });
     }
 };
+
 const updateTodo = async (req, res) => {
-    const {id} = req.params;
-    const {title, description} = req.body;
+    const { id } = req.params;
+    const { title, completed } = req.body;
     try {
-        const updatedTodo = await prisma.todos.update({ // เปลี่ยนจาก prisma.todo เป็น prisma.todos
-            where: {id: Number(id)},
-            data: {
-                title,
-                description,
-            },
-        });
+        const updatedTodo = await Todo.findByIdAndUpdate(
+            id,
+            { title, completed },
+            { new: true } // Return the updated document
+        );
+        if (!updatedTodo) {
+            return res.status(404).json({ error: 'Todo not found' });
+        }
         res.status(200).json(updatedTodo);
     } catch (error) {
-        res.status(500).json({error: 'Failed to update todo'});
+        res.status(500).json({ error: 'Failed to update todo' });
     }
-}
-const deleteTodo = async (req, res) => {
-    const {id} = req.params;
-    if (!id) {
-        return res.status(400).json({error: 'Todo ID is required'});
-    }
-    
-    const todoExists = await prisma.todos.findUnique({
-        where: { id: Number(id) }
-    });
-    
-    if (!todoExists) {
-        return res.status(404).json({error: 'Todo not found'});
-    }
-    try {
-        await prisma.todos.delete({ // เปลี่ยนจาก prisma.todo เป็น prisma.todos
-            where: {id: Number(id)},
-        });
-        res.status(204).send({message : 'Todo deleted successfully'});
-    } catch (error) {
-        res.status(500).json({error: 'Failed to delete todo'});
-    }
-}
+};
 
-export {getTodos, createTodo, updateTodo, deleteTodo};
+const deleteTodo = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const deletedTodo = await Todo.findByIdAndDelete(id);
+        if (!deletedTodo) {
+            return res.status(404).json({ error: 'Todo not found' });
+        }
+        res.status(204).send({ message: 'Todo deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete todo' });
+    }
+};
+
+export { getTodos, createTodo, updateTodo, deleteTodo };
