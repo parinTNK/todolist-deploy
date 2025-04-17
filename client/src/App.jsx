@@ -4,70 +4,103 @@ import axios from "axios";
 const App = () => {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState({ title: "" });
+  const [loading, setLoading] = useState(false);
+  const [adding, setAdding] = useState(false); // Track the adding state
+  const [deletingId, setDeletingId] = useState(null); // Track the ID of the todo being deleted
 
   useEffect(() => {
     fetchTodos();
   }, []);
 
   const fetchTodos = async () => {
+    setLoading(true);
     try {
       const response = await axios.get("https://todolist-deploy-6q3u.onrender.com/api/todos");
       setTodos(response.data);
     } catch (error) {
       console.error("Error fetching todos:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const addTodo = async () => {
+    if (!newTodo.title.trim()) return; // Prevent adding empty todos
+    setAdding(true); // Set adding state to true
     try {
       const response = await axios.post("https://todolist-deploy-6q3u.onrender.com/api/todos", newTodo);
       setTodos([...todos, response.data]);
       setNewTodo({ title: "" });
     } catch (error) {
       console.error("Error adding todo:", error);
+    } finally {
+      setAdding(false); // Reset adding state
     }
   };
 
   const deleteTodo = async (id) => {
+    setDeletingId(id); // Set the ID of the todo being deleted
     try {
       await axios.delete(`https://todolist-deploy-6q3u.onrender.com/api/todos/${id}`);
-      setTodos(todos.filter((todo) => todo._id !== id)); // ใช้ _id แทน id
+      setTodos(todos.filter((todo) => todo._id !== id));
     } catch (error) {
       console.error("Error deleting todo:", error);
+    } finally {
+      setDeletingId(null); // Clear the deleting ID after the operation
     }
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-center">Todo List</h1>
-      <div className="mb-6 flex gap-4 justify-center">
+    <div className="container mx-auto p-4 max-w-2xl">
+      <h1 className="text-4xl font-bold mb-6 text-center text-blue-600">Todo List</h1>
+      <div className="mb-6 flex flex-col sm:flex-row gap-4 justify-center">
         <input
           type="text"
-          placeholder="Title"
+          placeholder="Enter a new todo..."
           value={newTodo.title}
           onChange={(e) => setNewTodo({ ...newTodo, title: e.target.value })}
-          className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
           onClick={addTodo}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            adding
+              ? "bg-gray-400 text-white cursor-not-allowed"
+              : "bg-blue-500 text-white hover:bg-blue-600"
+          }`}
+          disabled={adding} // Disable button while adding
         >
-          Add Todo
+          {adding ? "Adding..." : "Add Todo"}
         </button>
       </div>
-      <ul className="space-y-4">
-        {todos.map((todo) => (
-          <li key={todo._id} className="bg-white p-4 rounded-lg shadow flex flex-row justify-between items-center">
-            <h3 className="text-xl font-semibold mb-2">{todo.title}</h3>
-            <button
-              onClick={() => deleteTodo(todo._id)} // ใช้ _id แทน id
-              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
+      {loading ? (
+        <div className="text-center text-gray-500">Loading...</div>
+      ) : (
+        <ul className="space-y-4">
+          {todos.map((todo) => (
+            <li
+              key={todo._id}
+              className="bg-white p-4 rounded-lg shadow flex flex-row justify-between items-center"
             >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
+              <h3 className="text-lg font-medium">{todo.title}</h3>
+              <button
+                onClick={() => deleteTodo(todo._id)}
+                className={`px-3 py-1 rounded transition-colors ${
+                  deletingId === todo._id
+                    ? "bg-gray-400 text-white cursor-not-allowed"
+                    : "bg-red-500 text-white hover:bg-red-600"
+                }`}
+                disabled={deletingId === todo._id} // Disable button while deleting
+              >
+                {deletingId === todo._id ? "Deleting..." : "Delete"}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {todos.length === 0 && !loading && (
+        <p className="text-center text-gray-500 mt-4">No todos available. Add one!</p>
+      )}
     </div>
   );
 };
