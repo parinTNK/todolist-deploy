@@ -6,15 +6,12 @@ const todoSchema = new mongoose.Schema({
     completed: { type: Boolean, default: false },
 });
 
-// Add an index to the title field for faster queries
-todoSchema.index({ title: 1 });
-
 // Create the Todo model
 const Todo = mongoose.model('Todo', todoSchema);
 
 const getTodos = async (req, res) => {
     try {
-        const todos = await Todo.find().lean(); // Use lean() for better performance
+        const todos = await Todo.find(); // Fetch all todos
         res.status(200).json(todos);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch todos' });
