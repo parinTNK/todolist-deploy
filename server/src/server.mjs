@@ -5,14 +5,13 @@ import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
 import connectDB from "./db.mjs";
-import todoRoute from "./routes/todoRoute.mjs";
-import { getTodos, createTodo, updateTodo, deleteTodo } from "./controllers/todoController.mjs";
+import todoRoute from "./routes/todoRoute.mjs"; // Import router instance โดยตรง
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // Allow all origins for simplicity
+    origin: "*", // ควรระบุ origin ที่เฉพาะเจาะจงสำหรับ production
   },
 });
 
@@ -25,9 +24,9 @@ app.use(morgan("dev"));
 
 // Socket.IO connection
 io.on("connection", (socket) => {
-  console.log("A user connected");
+  console.log("A user connected:", socket.id);
   socket.on("disconnect", () => {
-    console.log("A user disconnected");
+    console.log("A user disconnected:", socket.id);
   });
 });
 
@@ -35,33 +34,16 @@ app.get("/", (req, res) => {
   res.send("Welcome to the Todo API");
 });
 
-//localhost:5000/api/todos
-app.use("/api/todos", todoRoute);
-
-// Modify controller functions to emit events
-app.post("/api/todos", async (req, res) => {
-  try {
-    const newTodo = await createTodo(req, res);
-    if (newTodo) {
-      io.emit("todoAdded", newTodo); // Emit event for new todo
-    }
-  } catch (error) {
-    console.error(error);
-  }
+// --- ส่ง io instance ให้กับ Router (วิธีที่ 2) ---
+// Middleware เพื่อแนบ io เข้ากับ req
+app.use((req, res, next) => {
+  req.io = io;
+  next();
 });
+app.use("/api/todos", todoRoute); // ใช้ router instance ที่ import มา
 
-app.delete("/api/todos/:id", async (req, res) => {
-  try {
-    const deletedTodo = await deleteTodo(req, res);
-    if (deletedTodo) {
-      io.emit("todoDeleted", req.params.id); // Emit event for deleted todo
-    }
-  } catch (error) {
-    console.error(error);
-  }
-});
-
-app.listen(PORT, () => {
+// Start server
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   connectDB();
 });
