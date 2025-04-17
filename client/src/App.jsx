@@ -33,7 +33,7 @@ const App = () => {
       await axios.delete(`https://todolist-deploy-6q3u.onrender.com/api/todos/${id}`);
       setTodos(todos.filter((todo) => todo.id !== id));
     } catch (error) {
-      console.error("Error deleting todo:", error);
+      console.error("Error deleting :", error);
     }
   };
 
