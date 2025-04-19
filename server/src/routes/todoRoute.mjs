@@ -1,14 +1,19 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import mongoose from 'mongoose';
 =======
 import express from 'express';
 import { getTodos, createTodo, updateTodo, deleteTodo } from '../controllers/todoController.mjs';
 >>>>>>> 71e5b49 (Update start script for production)
+=======
+import mongoose from 'mongoose';
+>>>>>>> 580264a (Update start script for production)
 
 // Define the Todo schema
 const todoSchema = new mongoose.Schema({
     title: { type: String, required: true },
     completed: { type: Boolean, default: false },
+<<<<<<< HEAD
 });
 
 <<<<<<< HEAD
@@ -22,25 +27,23 @@ router.get('/', getTodos); // getTodos ต้องรับ req, res
 router.post('/', async (req, res) => {
     // ส่ง req, res และ io ไปยัง controller
     await createTodo(req, res, req.io);
+=======
+>>>>>>> 580264a (Update start script for production)
 });
 
-// PUT /api/todos/:id
-router.put('/:id', async (req, res) => {
-    // ส่ง req, res และ io ไปยัง controller (ถ้าต้องการ emit ตอน update)
-    await updateTodo(req, res /*, req.io */);
-});
+// Create the Todo model
+const Todo = mongoose.model('Todo', todoSchema);
 
-// DELETE /api/todos/:id
-router.delete('/:id', async (req, res) => {
-  console.log(`DELETE request received for ID: ${req.params.id}`); // เพิ่ม log
-  const { id } = req.params;
-  if (!id) { // เพิ่มการตรวจสอบ id parameter
-       console.error("ID parameter is missing in DELETE request");
-       return res.status(400).json({ error: 'Todo ID parameter is required' });
-  }
-  try {
-      const result = await deleteTodo(id); // เรียก controller
+const getTodos = async (req, res) => {
+    try {
+        const todos = await Todo.find(); // Fetch all todos
+        res.status(200).json(todos);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch todos' });
+    }
+};
 
+<<<<<<< HEAD
       if (result.success) {
           console.log(`Successfully deleted todo with ID: ${result.id}`); // เพิ่ม log
           req.io.emit("todoDeleted", result.id); // Emit จาก route handler
@@ -78,6 +81,19 @@ const createTodo = async (req, res) => {
     }
 };
 
+=======
+const createTodo = async (req, res) => {
+    const { title } = req.body;
+    try {
+        const newTodo = new Todo({ title });
+        await newTodo.save(); // Save the new todo
+        res.status(201).json(newTodo);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create todo', details: error.message });
+    }
+};
+
+>>>>>>> 580264a (Update start script for production)
 const updateTodo = async (req, res) => {
     const { id } = req.params;
     const { title, completed } = req.body;
