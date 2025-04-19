@@ -31,7 +31,7 @@ io.on("connection", (socket) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Welcome to the Todo API");
+  res.send("Todo API");
 });
 
 // --- ส่ง io instance ให้กับ Router (วิธีที่ 2) ---
